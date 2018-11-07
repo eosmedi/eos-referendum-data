@@ -13,18 +13,33 @@ var referendumStater = new ReferendumState(config.lokijs);
 var server = require('http').createServer(app);
 
 app.disable('x-powered-by');
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+  });
 
 var config = require('./config');
 var compression = require('compression');
 
 
 app.get('/getProposes', function(req, res, next){
-    res.json(referendumStater.proposers.find());
+    var query = req.query || {};
+    res.json(referendumStater.proposers.find(query));
+});
+
+app.get('/getPropose/:propose', function(req, res, next){
+    console.log(req.params.propose);
+    var propose = req.params.propose;
+    var query = req.query || {};
+    query.proposal_name = propose;
+    res.json(referendumStater.proposers.findOne(query));
 });
 
 app.get('/getVoters', function(req, res, next){
     var query = req.query || {};
-
     if(query.vote){
         query.vote = parseInt(query.vote);
     }
@@ -33,4 +48,4 @@ app.get('/getVoters', function(req, res, next){
 
 
 app.use(compression());
-server.listen(8080);
+server.listen(8081);

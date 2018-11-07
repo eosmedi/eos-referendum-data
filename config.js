@@ -12,7 +12,7 @@ var config = {
     elasticsearch: '127.0.0.1:9200',
     httpEndPoint: 'http://127.0.0.1:28888',
     database: {
-        voter_log: BASE_DIR+'vote.log',
+        voter_log: BASE_DIR+'vote_log',
         vote_check_point_file: BASE_DIR+'fetched',
         state: BASE_DIR+'state.json',
         transfer_log: BASE_DIR+'transfer_log',
