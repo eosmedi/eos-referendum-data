@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Socket Stream</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.min.js"></script>
+</head>
+<body>
+
+    <div id="app">
+        <ul>
+            <li v-for="log in logs">
+                {{ log.formated }}<br>
+                <!-- {{ log }} -->
+            </li>
+        </ul>
+    </div>
+
+<script>
+
+var ready = false;
+if (Notification.permission == "granted") {
+    ready = true;
+}else{
+    Notification.requestPermission().then(function(result) {
+        console.log(result);
+        ready = true;
+    });
+}
+
+var messageTemplate = {
+    stake: `$(refType):$(to)'s voter $(voter) [$(action)] amount=$(staked) EOS \n\nhttps://votetracker.io`,
+    vote: `$(voter) [$(action) $(target)] ->  [$(to)] amount=$(stake) EOS \n\nView Details in  https://votetracker.io/#/$(link)/$(to)`,
+    rank: `$(producer) rank changed from $(lastRank) to $(rank) \n\nhttps://votetracker.io`,
+}
+
+function templateEngine(tpl, data) {
+    // console.log(tpl, data);
+    var re = /\$\(([^\)]+)?\)/g, match;
+    while(match = re.exec(tpl)) {
+        tpl = tpl.replace(match[0], data[match[1]])
+        re.lastIndex = 0;
+    }
+    return tpl;
+}
+
+function getNotifyMessage(log){
+    var template = "";
+    if(log.staked && !log.type){
+        log.stake = (log.staked / 10000).toFixed(2);
+    }
+    if(log.type){
+        if(log.producer && log.proxy){
+            log.refType = 'proxy';
+            log.to = log.proxy;
+        }else if(log.producer){
+            log.refType = 'producer';
+            log.to = log.producer;
+        }else if(log.proxy){
+            log.refType = 'proxy';
+            log.to = log.proxy;
+        }
+        template = messageTemplate.stake;
+    }else if(log.lastRank){
+        template = messageTemplate.rank;
+    }else if(log.producer || log.proxy){
+        var type = 'producer';
+        log.to = log.producer;
+        log.link = 'producer';
+        if(log.proxy){
+            type = 'proxy';
+            log.to = log.proxy;
+            log.link = 'voter';
+        }
+        log.target = type;
+        template = messageTemplate.vote;
+    }
+
+    if(template){
+        return templateEngine(template, log);
+    }else{
+        return template;
+    }
+}
+
+function senNotify(log){
+    var message = getNotifyMessage(log);
+    var notification = new Notification("change", {
+        body: message
+    });
+    
+    notification.onclick = function() {
+        notification.close();    
+    };
+
+
+    setTimeout(() => {
+        notification.close();   
+    },  3000);
+    console.log(message)
+}
+
+
+var app = new Vue({
+    data: function () {
+        return {
+            logs: []
+        }
+    },
+    mounted: function () {
+        var socket = io('https://api.tallymeter.io');
+        socket.on('log', (log) => {
+            console.log('log', log);
+            senNotify(Object.assign({}, log));
+            log.formated = getNotifyMessage(Object.assign({}, log));
+            this.logs.push(log);
+        })
+    },
+}).$mount('#app');
+</script>
+
+
+
+</body>
+</html>
