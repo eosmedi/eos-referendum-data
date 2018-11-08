@@ -28,12 +28,15 @@ var compression = require('compression');
 app.get('/getProposes', function(req, res, next){
     var query = req.query || {};
     var sortBy = query.sort_by || 'created_at';
+    var getAll = query.all;
     var proposersTable = referendumStater.proposers.chain();
     proposersTable = proposersTable.simplesort(sortBy, true);
-    var nowTime = moment().unix();
-    proposersTable = proposersTable.where(function(obj) { 
-        return obj.expires_at > nowTime;
-    });
+    if(!getAll){
+        var nowTime = moment().unix();
+        proposersTable = proposersTable.where(function(obj) { 
+            return obj.expires_at > nowTime;
+        });
+    }
     res.json(proposersTable.find(query).data());
 });
 
