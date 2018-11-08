@@ -4,11 +4,12 @@
 ### /getProposes
 
 - **Params**：
-  - `{String} code` 合约代码
+  - `{String} sort_by` sort by key
+  - `{String} all` default is 0
 
 - **Use**：
-
   list all proposes
+
 
 
 
