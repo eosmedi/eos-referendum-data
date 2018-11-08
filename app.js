@@ -27,7 +27,10 @@ var compression = require('compression');
 
 app.get('/getProposes', function(req, res, next){
     var query = req.query || {};
-    res.json(referendumStater.proposers.find(query));
+    var sortBy = query.sort_by || 'created_at';
+    var proposersTable = referendumStater.proposers.chain();
+    proposersTable = proposersTable.simplesort(sortBy, true);
+    res.json(proposersTable.find(query).data());
 });
 
 app.get('/getPropose/:propose', function(req, res, next){
