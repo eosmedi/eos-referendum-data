@@ -37,6 +37,10 @@ app.get('/getProposes', function(req, res, next){
             return obj.expires_at > nowTime;
         });
     }
+
+    delete query.sort_by;
+    delete query.all;
+    
     res.json(proposersTable.find(query).data());
 });
 
