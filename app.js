@@ -24,7 +24,6 @@ app.use(function (req, res, next) {
 var config = require('./config');
 var compression = require('compression');
 
-
 app.get('/getProposes', function(req, res, next){
     var query = req.query || {};
     var sortBy = query.sort_by || 'created_at';
@@ -40,7 +39,7 @@ app.get('/getProposes', function(req, res, next){
 
     delete query.sort_by;
     delete query.all;
-    
+
     res.json(proposersTable.find(query).data());
 });
 
