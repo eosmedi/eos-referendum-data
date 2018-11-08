@@ -30,6 +30,10 @@ app.get('/getProposes', function(req, res, next){
     var sortBy = query.sort_by || 'created_at';
     var proposersTable = referendumStater.proposers.chain();
     proposersTable = proposersTable.simplesort(sortBy, true);
+    var nowTime = moment().unix();
+    proposersTable = proposersTable.where(function(obj) { 
+        return obj.expires_at > nowTime;
+    });
     res.json(proposersTable.find(query).data());
 });
 
