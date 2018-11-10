@@ -61,7 +61,7 @@ app.get('/getComments', function(req, res, next){
 
     delete query.sort_by;
     delete query.all;
-    res.json(proposersTable.find(query).data());
+    res.json(currentTable.find(query).data());
 });
 
 
