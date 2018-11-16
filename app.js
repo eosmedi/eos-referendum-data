@@ -51,6 +51,20 @@ app.get('/getPropose/:propose', function(req, res, next){
     res.json(referendumStater.proposers.findOne(query));
 });
 
+
+app.get('/getComments', function(req, res, next){
+    var query = req.query || {};
+    var sortBy = query.sort_by || 'created_at';
+    var getAll = query.all;
+    var currentTable = referendumStater.comments.chain();
+    currentTable = currentTable.simplesort(sortBy, true);
+
+    delete query.sort_by;
+    delete query.all;
+    res.json(currentTable.find(query).data());
+});
+
+
 app.get('/getVoters', function(req, res, next){
     var query = req.query || {};
     if(query.vote){
